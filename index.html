@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>IST Synced Analog + Digital Clock</title>
+<title>IST Analog + Digital Clock</title>
 
 <style>
 body{
@@ -21,14 +21,27 @@ body{
     text-align:center;
 }
 
-/* Digital Clock */
-.digital{
-    font-size:28px;
-    margin-bottom:30px;
-    letter-spacing:2px;
+/* Day & Date */
+.date{
+    font-size:20px;
+    margin-bottom:8px;
+    letter-spacing:1px;
 }
 
-/* Analog Clock */
+.day{
+    font-size:18px;
+    margin-bottom:20px;
+    color:#ddd;
+}
+
+/* Digital */
+.digital{
+    font-size:30px;
+    margin-bottom:30px;
+    letter-spacing:3px;
+}
+
+/* Analog */
 .analog{
     width:260px;
     height:260px;
@@ -36,6 +49,7 @@ body{
     border:8px solid white;
     position:relative;
     background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(10px);
 }
 
 /* Center Dot */
@@ -50,7 +64,7 @@ body{
     transform:translate(-50%,-50%);
 }
 
-/* Clock Hands */
+/* Hands */
 .hand{
     position:absolute;
     bottom:50%;
@@ -92,6 +106,8 @@ body{
 
 <div class="clock-container">
 
+    <div id="day" class="day"></div>
+    <div id="date" class="date"></div>
     <div id="digital" class="digital">--:--:--</div>
 
     <div id="analog" class="analog">
@@ -105,7 +121,7 @@ body{
 
 <script>
 
-/* Create Numbers */
+/* Create Clock Numbers */
 const analog = document.getElementById("analog");
 const center = 130;
 const radius = 110;
@@ -126,7 +142,7 @@ for (let i = 1; i <= 12; i++) {
 /* Update Clock */
 function updateClock() {
 
-    /* FORCE IST TIME */
+    /* IST Time */
     const now = new Date(
         new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
     );
@@ -136,7 +152,17 @@ function updateClock() {
     const seconds = now.getSeconds();
     const milliseconds = now.getMilliseconds();
 
-    /* DIGITAL */
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+    /* Day & Date */
+    document.getElementById("day").innerText = days[now.getDay()];
+    document.getElementById("date").innerText =
+        now.getDate() + " " +
+        months[now.getMonth()] + " " +
+        now.getFullYear();
+
+    /* Digital */
     const displayHour = hours % 12 || 12;
     const ampm = hours >= 12 ? "PM" : "AM";
 
@@ -145,7 +171,7 @@ function updateClock() {
         minutes.toString().padStart(2, "0") + " : " +
         seconds.toString().padStart(2, "0") + " " + ampm;
 
-    /* SMOOTH ANALOG */
+    /* Smooth Analog */
     const smoothSeconds = seconds + milliseconds / 1000;
     const smoothMinutes = minutes + smoothSeconds / 60;
     const smoothHours = (hours % 12) + smoothMinutes / 60;

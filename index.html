@@ -1,171 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Perfect Synced Flower Watch</title>
-    <style>
-        body{
-            margin:0;
-            height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            font-family:Arial, sans-serif;
-            background:url("https://images.unsplash.com/photo-1490750967868-88aa4486c946")
-            no-repeat center center/cover;
-        }
-
-        .watch{
-            width:370px;
-            height:520px;
-            background:rgba(255,255,255,0.2);
-            backdrop-filter:blur(15px);
-            border-radius:20px;
-            padding:20px;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            color:white;
-            box-shadow:0 0 30px rgba(0,0,0,0.5);
-        }
-
-        .analog{
-            width:250px;
-            height:250px;
-            border:6px solid white;
-            border-radius:50%;
-            position:relative;
-            margin-bottom:20px;
-        }
-
-        .number{
-            position:absolute;
-            font-size:18px;
-            font-weight:bold;
-            transform:translate(-50%,-50%);
-        }
-
-        .hand{
-            position:absolute;
-            top:50%;
-            left:50%;
-            transform-origin:0% 50%;
-        }
-
-        .hour{
-            width:30%;
-            height:6px;
-            background:white;
-            border-radius:5px;
-        }
-
-        .minute{
-            width:40%;
-            height:4px;
-            background:white;
-            border-radius:4px;
-        }
-
-        .second{
-            width:45%;
-            height:2px;
-            background:red;
-        }
-
-        .center-dot{
-            width:14px;
-            height:14px;
-            background:white;
-            border-radius:50%;
-            position:absolute;
-            top:50%;
-            left:50%;
-            transform:translate(-50%,-50%);
-        }
-
-        .digital{
-            font-size:28px;
-            margin:10px 0;
-        }
-
-        .date,.day{
-            font-size:16px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="watch">
-    <div class="analog" id="analog">
-        <div class="hand hour" id="hour"></div>
-        <div class="hand minute" id="minute"></div>
-        <div class="hand second" id="second"></div>
-        <div class="center-dot"></div>
-    </div>
-
-    <div class="digital" id="digital"></div>
-    <div class="day" id="day"></div>
-    <div class="date" id="date"></div>
-</div>
-
 <script>
 const analog = document.getElementById("analog");
 
-/* Create Numbers 1-12 */
-for(let i=1;i<=12;i++){
-    const num=document.createElement("div");
-    num.className="number";
-    num.innerText=i;
+/* Create numbers */
+for (let i = 1; i <= 12; i++) {
+    const num = document.createElement("div");
+    num.className = "number";
+    num.innerText = i;
 
-    const angle=i*30*Math.PI/180;
-    const radius=110;
-    const center=125;
+    const angle = i * 30 * Math.PI / 180;
+    const radius = 110;
+    const center = 125;
 
-    num.style.left=center + radius*Math.sin(angle) + "px";
-    num.style.top=center - radius*Math.cos(angle) + "px";
+    num.style.left = center + radius * Math.sin(angle) + "px";
+    num.style.top = center - radius * Math.cos(angle) + "px";
 
     analog.appendChild(num);
 }
 
-function updateClock(){
+function updateClock() {
 
-    const now=new Date();
+    const now = new Date();
 
-    const hours24=now.getHours();
-    const minutes=now.getMinutes();
-    const seconds=now.getSeconds();
-    const ms=now.getMilliseconds();
+    const h24 = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+    const ms = now.getMilliseconds();
 
     /* DIGITAL */
-    const displayHour=hours24%12||12;
-    const ampm=hours24>=12?"PM":"AM";
+    const displayH = h24 % 12 || 12;
+    const ampm = h24 >= 12 ? "PM" : "AM";
 
-    document.getElementById("digital").innerText=
-        displayHour.toString().padStart(2,"0")+" : "+
-        minutes.toString().padStart(2,"0")+" : "+
-        seconds.toString().padStart(2,"0")+" "+ampm;
+    document.getElementById("digital").innerText =
+        displayH.toString().padStart(2,"0") + " : " +
+        m.toString().padStart(2,"0") + " : " +
+        s.toString().padStart(2,"0") + " " + ampm;
 
     const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
     const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-    document.getElementById("day").innerText=days[now.getDay()];
-    document.getElementById("date").innerText=
+    document.getElementById("day").innerText = days[now.getDay()];
+    document.getElementById("date").innerText =
         now.getDate()+" "+months[now.getMonth()]+" "+now.getFullYear();
 
-    /* PERFECT ANALOG SYNC */
+    /* PERFECT ANALOG CALCULATION */
 
-    const hourDeg=(hours24%12)*30 + minutes*0.5 + seconds*(0.5/60);
-    const minuteDeg=minutes*6 + seconds*0.1 + ms*(0.1/1000);
-    const secondDeg=seconds*6 + ms*0.006;
+    // Hour: 30° per hour + 0.5° per minute + 0.00833° per second
+    const hourAngle =
+        (h24 % 12) * 30 +
+        m * 0.5 +
+        s * (0.5 / 60);
 
-    document.getElementById("hour").style.transform=`rotate(${hourDeg}deg)`;
-    document.getElementById("minute").style.transform=`rotate(${minuteDeg}deg)`;
-    document.getElementById("second").style.transform=`rotate(${secondDeg}deg)`;
+    // Minute: 6° per minute + 0.1° per second + ms adjustment
+    const minuteAngle =
+        m * 6 +
+        s * 0.1 +
+        ms * 0.0001 * 6;
+
+    // Second: 6° per second + ms smooth
+    const secondAngle =
+        s * 6 +
+        ms * 0.006;
+
+    document.getElementById("hour").style.transform =
+        `translate(-0%, -50%) rotate(${hourAngle}deg)`;
+
+    document.getElementById("minute").style.transform =
+        `translate(-0%, -50%) rotate(${minuteAngle}deg)`;
+
+    document.getElementById("second").style.transform =
+        `translate(-0%, -50%) rotate(${secondAngle}deg)`;
 
     requestAnimationFrame(updateClock);
 }
 
 updateClock();
 </script>
-
-</body>
-</html>

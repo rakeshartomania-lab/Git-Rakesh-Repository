@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Smart Glass Watch is mine</title>
+    <title>Flower Background Watch</title>
     <style>
         body {
             margin: 0;
@@ -9,73 +9,73 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
             font-family: Arial, sans-serif;
+
+            /* Flower Background */
+            background: url("https://images.unsplash.com/photo-1490750967868-88aa4486c946")
+            no-repeat center center/cover;
         }
 
         .watch {
             width: 350px;
-            height: 520px;
-            backdrop-filter: blur(20px);
-            background: rgba(255,255,255,0.1);
+            height: 500px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 0 30px cyan;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
             color: white;
+            box-shadow: 0 0 25px rgba(0,0,0,0.5);
         }
 
         .analog {
-            width: 220px;
-            height: 220px;
+            width: 240px;
+            height: 240px;
             border: 6px solid white;
             border-radius: 50%;
             position: relative;
             margin-bottom: 20px;
         }
 
-        /* Clock Numbers */
         .number {
             position: absolute;
-            color: white;
             font-size: 18px;
             font-weight: bold;
             transform: translate(-50%, -50%);
         }
 
-        /* Clock Hands */
         .hand {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform-origin: 0%;
-            transform: rotate(90deg);
+            transform-origin: 0% 50%;
         }
 
         .hour {
-            width: 35%;
-            height: 4px;
+            width: 30%;
+            height: 5px;
             background: white;
+            border-radius: 5px;
         }
 
         .minute {
-            width: 45%;
-            height: 3px;
+            width: 40%;
+            height: 4px;
             background: white;
+            border-radius: 4px;
         }
 
         .second {
-            width: 50%;
+            width: 45%;
             height: 2px;
             background: red;
         }
 
         .center-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             background: white;
             border-radius: 50%;
             position: absolute;
@@ -85,29 +85,12 @@
         }
 
         .digital {
-            font-size: 28px;
+            font-size: 26px;
             margin: 10px 0;
         }
 
         .date, .day {
             font-size: 16px;
-        }
-
-        .alarm-section {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        input, button {
-            padding: 6px;
-            border-radius: 5px;
-            border: none;
-            margin: 5px;
-        }
-
-        button {
-            cursor: pointer;
-            background: cyan;
         }
     </style>
 </head>
@@ -124,28 +107,22 @@
     <div class="digital" id="digital"></div>
     <div class="day" id="day"></div>
     <div class="date" id="date"></div>
-
-    <div class="alarm-section">
-        <input type="time" id="alarmTime">
-        <button onclick="setAlarm()">Set Alarm</button>
-        <div id="alarmStatus"></div>
-    </div>
 </div>
 
 <script>
     const analog = document.getElementById("analog");
 
-    // Create clock numbers dynamically
+    // Add numbers 1-12
     for (let i = 1; i <= 12; i++) {
         const number = document.createElement("div");
         number.className = "number";
         number.innerText = i;
 
         const angle = (i * 30) * (Math.PI / 180);
-        const radius = 90;
+        const radius = 100;
 
-        const x = 110 + radius * Math.sin(angle);
-        const y = 110 - radius * Math.cos(angle);
+        const x = 120 + radius * Math.sin(angle);
+        const y = 120 - radius * Math.cos(angle);
 
         number.style.left = x + "px";
         number.style.top = y + "px";
@@ -153,61 +130,42 @@
         analog.appendChild(number);
     }
 
-    let alarmTime = null;
-
     function updateClock() {
         const now = new Date();
 
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        let seconds = now.getSeconds();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        const milliseconds = now.getMilliseconds();
 
-        // AM PM
-        let ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-
-        let h = hours < 10 ? "0" + hours : hours;
-        let m = minutes < 10 ? "0" + minutes : minutes;
-        let s = seconds < 10 ? "0" + seconds : seconds;
+        /* Digital */
+        let displayHours = hours % 12 || 12;
+        const ampm = hours >= 12 ? "PM" : "AM";
 
         document.getElementById("digital").innerText =
-            h + " : " + m + " : " + s + " " + ampm;
+            `${displayHours.toString().padStart(2,"0")} :
+             ${minutes.toString().padStart(2,"0")} :
+             ${seconds.toString().padStart(2,"0")} ${ampm}`;
 
         const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
         const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
         document.getElementById("day").innerText = days[now.getDay()];
         document.getElementById("date").innerText =
-            now.getDate() + " " + months[now.getMonth()] + " " + now.getFullYear();
+            `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 
-        const hourDeg = (hours * 30) + (minutes / 2);
-        const minuteDeg = minutes * 6;
-        const secondDeg = seconds * 6;
+        /* Analog rotation */
+        const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+        const minuteDeg = minutes * 6 + seconds * 0.1;
+        const secondDeg = seconds * 6 + milliseconds * 0.006;
 
         document.getElementById("hour").style.transform = `rotate(${hourDeg}deg)`;
         document.getElementById("minute").style.transform = `rotate(${minuteDeg}deg)`;
         document.getElementById("second").style.transform = `rotate(${secondDeg}deg)`;
 
-        // Live color glow
-        const hue = seconds * 6;
-        document.querySelector(".watch").style.boxShadow =
-            `0 0 30px hsl(${hue}, 100%, 50%)`;
-
-        const currentTime = now.toTimeString().slice(0,5);
-        if (alarmTime === currentTime) {
-            alert("⏰ Alarm Ringing!");
-            alarmTime = null;
-        }
+        requestAnimationFrame(updateClock);
     }
 
-    function setAlarm() {
-        alarmTime = document.getElementById("alarmTime").value;
-        document.getElementById("alarmStatus").innerText =
-            "Alarm set for " + alarmTime;
-    }
-
-    setInterval(updateClock, 1000);
     updateClock();
 </script>
 
